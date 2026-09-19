@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#071329">
+<meta name="description" content="Modern Student Record Manager web application">
+<title>Student Record Manager</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Arial,sans-serif;
+  min-height:100vh;
+  background:linear-gradient(135deg,#0f172a,#1e3a8a,#312e81);
+  color:#fff;
+  padding:30px 15px;
+}
+.container{max-width:850px;margin:auto}
+h1{text-align:center;margin-bottom:8px}
+.subtitle{text-align:center;color:#cbd5e1;margin-bottom:25px}
+.card{
+  background:rgba(255,255,255,.10);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:20px;
+  padding:25px;
+  margin-bottom:20px;
+  box-shadow:0 15px 40px rgba(0,0,0,.25)
+}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+label{display:block;margin-bottom:6px;font-weight:bold}
+input{
+  width:100%;padding:12px;border:0;border-radius:10px;
+  background:#fff;color:#111;font-size:15px
+}
+button{
+  border:0;border-radius:10px;padding:12px 18px;
+  font-size:15px;font-weight:bold;cursor:pointer;margin-top:15px
+}
+.add{background:#22c55e;color:white}
+.search{background:#38bdf8;color:#082f49}
+.download{background:#f59e0b;color:#111}
+.clear{background:#ef4444;color:white}
+button:hover{opacity:.88}
+.message{margin-top:15px;padding:12px;border-radius:10px;display:none}
+.success{background:rgba(34,197,94,.2);color:#bbf7d0}
+.error{background:rgba(239,68,68,.2);color:#fecaca}
+.record{
+  background:rgba(0,0,0,.2);padding:15px;border-radius:12px;
+  margin-top:10px;line-height:1.7
+}
+.record strong{color:#93c5fd}
+pre{
+  white-space:pre-wrap;background:#020617;padding:15px;border-radius:10px;
+  margin-top:15px;max-height:250px;overflow:auto
+}
+@media(max-width:650px){.grid{grid-template-columns:1fr}}
+
+/* =========================================================
+   GUI ENHANCEMENTS
+========================================================= */
+
+.topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:22px;
+    padding:12px 16px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;
+    background:rgba(2,6,23,.38);
+    backdrop-filter:blur(16px);
+    box-shadow:0 12px 35px rgba(0,0,0,.18);
+}
+
+.brand-mini{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.brand-mini span{
+    color:#67e8f9;
+    font-size:22px;
+    text-shadow:0 0 18px rgba(103,232,249,.7);
+}
+
+.brand-mini small{
+    color:#64748b;
+    font-weight:600;
+    letter-spacing:0;
+}
+
+.live-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#86efac;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1px;
+}
+
+.live-status i{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#22c55e;
+    box-shadow:0 0 12px #22c55e;
+    animation:livePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes livePulse{
+    50%{opacity:.35;transform:scale(.75)}
+}
+
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.dashboard-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:18px;
+    border-radius:20px;
+    background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.025));
+    border:1px solid rgba(255,255,255,.1);
+    backdrop-filter:blur(16px);
+    box-shadow:0 18px 45px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.1);
+    transition:.3s ease;
+}
+
+.dashboard-card:hover{
+    transform:translateY(-5px);
+    border-color:rgba(103,232,249,.35);
+    box-shadow:0 22px 50px rgba(0,0,0,.25),0 0 25px rgba(56,189,248,.08);
+}
+
+.dashboard-icon{
+    width:48px;
+    height:48px;
+    display:grid;
+    place-items:center;
+    border-radius:14px;
+    background:rgba(56,189,248,.1);
+    border:1px solid rgba(56,189,248,.18);
+    font-size:23px;
+}
+
+.dashboard-label{
+    display:block;
+    color:#64748b;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:1.1px;
+    margin-bottom:4px;
+}
+
+.dashboard-card strong{
+    display:block;
+    font-size:23px;
+    background:linear-gradient(90deg,#67e8f9,#c084fc);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+
+.card h2{
+    letter-spacing:-.3px;
+}
+
+.input-group:focus-within label{
+    color:#67e8f9;
+}
+
+.button-row button{
+    min-height:48px;
+}
+
+button:focus-visible,
+input:focus-visible{
+    outline:2px solid #67e8f9;
+    outline-offset:3px;
+}
+
+.empty-state{
+    text-align:center;
+    padding:18px;
+    color:#64748b;
+}
+
+@media(max-width:750px){
+    .dashboard{
+        grid-template-columns:1fr;
+    }
+    .topbar{
+        padding:11px 13px;
+    }
+    .brand-mini small{
+        display:none;
+    }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="topbar">
+    <div class="brand-mini"><span>◈</span> SRM <small>Student Record Manager</small></div>
+    <div class="live-status"><i></i> SYSTEM ONLINE</div>
+  </div>
+  <h1>🎓 Student Record Manager</h1>
+  <p class="subtitle">Add, validate, save and search student records</p>
+
+  <div class="dashboard">
+    <div class="dashboard-card">
+      <div class="dashboard-icon">👥</div>
+      <div>
+        <span class="dashboard-label">TOTAL STUDENTS</span>
+        <strong id="totalStudents">0</strong>
+      </div>
+    </div>
+    <div class="dashboard-card">
+      <div class="dashboard-icon">📊</div>
+      <div>
+        <span class="dashboard-label">AVERAGE AGE</span>
+        <strong id="averageAge">0</strong>
+      </div>
+    </div>
+    <div class="dashboard-card">
+      <div class="dashboard-icon">💾</div>
+      <div>
+        <span class="dashboard-label">STORAGE</span>
+        <strong>LOCAL</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Add Student</h2>
+    <div class="grid" style="margin-top:18px">
+      <div>
+        <label>Roll Number</label>
+        <input id="roll" type="text" placeholder="Enter roll number">
+      </div>
+      <div>
+        <label>Student Name</label>
+        <input id="name" type="text" placeholder="Enter student name">
+      </div>
+      <div>
+        <label>Gmail</label>
+        <input id="email" type="email" placeholder="example@gmail.com">
+      </div>
+      <div>
+        <label>Age</label>
+        <input id="age" type="number" placeholder="Enter age">
+      </div>
+    </div>
+    <button class="add" onclick="addStudent()">Add Student</button>
+    <div id="addMessage" class="message"></div>
+  </div>
+
+  <div class="card">
+    <h2>Find Student</h2>
+    <div style="margin-top:18px">
+      <label>Roll Number</label>
+      <input id="searchRoll" type="text" placeholder="Enter roll number to search">
+    </div>
+    <button class="search" onclick="findStudent()">Find Student</button>
+    <div id="searchResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Saved Records</h2>
+    <p style="margin-top:8px;color:#cbd5e1">
+      Records are saved in your browser using Local Storage.
+    </p>
+    <button class="download" onclick="downloadTxt()">Download students.txt</button>
+    <button class="download" onclick="saveForNotepad()">Save & Open students.txt</button>
+    <button class="clear" onclick="clearRecords()">Clear All Records</button>
+    <pre id="filePreview">No records saved yet.</pre>
+  </div>
+  <footer class="footer">
+    Student Record Manager <span>•</span> Secure browser-based student data management
+  </footer>
+</div>
+
+<script>
+const STORAGE_KEY = "studentRecords";
+
+function getRecords(){
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+}
+
+function saveRecords(records){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  updateDashboard();
+  showPreview();
+}
+
+function showMessage(text,type){
+  const box=document.getElementById("addMessage");
+  box.textContent=text;
+  box.className="message "+type;
+  box.style.display="block";
+}
+
+function addStudent(){
+  const roll = document.getElementById("roll").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const age = document.getElementById("age").value.trim();
+
+  if (!/^\d+$/.test(roll)) {
+    showMessage("Invalid Roll Number!", "error");
+    return;
+  }
+
+  if (!name || !/^[A-Za-z ]+$/.test(name)) {
+    showMessage("Invalid Student Name!", "error");
+    return;
+  }
+
+  // Correct Gmail validation: accepts addresses such as akhila@gmail.com
+  const gmailPattern = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
+
+  if (!gmailPattern.test(email)) {
+    showMessage("Invalid Gmail! Example: akhila@gmail.com", "error");
+    return;
+  }
+
+  if (!/^\d+$/.test(age) || Number(age) <= 0 || Number(age) > 100) {
+    showMessage("Age must be between 1 and 100.", "error");
+    return;
+  }
+
+  const records = getRecords();
+
+  if (records.some(s => s.roll === roll)) {
+    showMessage("A student with this Roll Number already exists.", "error");
+    return;
+  }
+
+  records.push({
+    roll: roll,
+    name: name,
+    email: email,
+    age: Number(age)
+  });
+
+  saveRecords(records);
+
+  showMessage("Student data saved successfully! Click “Save & Open students.txt” to view the output in Notepad.", "success");
+
+  document.getElementById("roll").value = "";
+  document.getElementById("name").value = "";
+  document.getElementById("email").value = "";
+  document.getElementById("age").value = "";
+}
+function findStudent(){
+  const roll=document.getElementById("searchRoll").value.trim();
+  const result=document.getElementById("searchResult");
+
+  if(!/^\d+$/.test(roll)){
+    result.innerHTML='<div class="message error" style="display:block">Invalid Roll Number!</div>';
+    return;
+  }
+
+  const student=getRecords().find(s=>s.roll===roll);
+
+  if(!student){
+    result.innerHTML='<div class="message error" style="display:block">Student with this Roll Number not found.</div>';
+    return;
+  }
+
+  result.innerHTML=`
+    <div class="record">
+      <strong>STUDENT DETAILS</strong><br>
+      Roll Number : ${escapeHtml(student.roll)}<br>
+      Name        : ${escapeHtml(student.name)}<br>
+      Gmail       : ${escapeHtml(student.email)}<br>
+      Age         : ${student.age}
+    </div>`;
+}
+
+function downloadTxt(){
+  const records=getRecords();
+
+  if(records.length===0){
+    alert("No student records available.");
+    return;
+  }
+
+  const text=records.map(s=>`${s.roll}|${s.name}|${s.email}|${s.age}`).join("\\n");
+  const blob=new Blob([text],{type:"text/plain"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="students.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function saveForNotepad(){
+  const records = getRecords();
+
+  if(records.length === 0){
+    alert("No student records available.");
+    return;
+  }
+
+  const text = records
+    .map(s => `${s.roll}|${s.name}|${s.email}|${s.age}`)
+    .join("\r\n");
+
+  // Download a normal TXT file that opens directly in Windows Notepad.
+  const blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "students.txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  alert("students.txt has been saved. Open it with Notepad to view the student data.");
+}
+
+function clearRecords(){
+  if(confirm("Delete all student records?")){
+    localStorage.removeItem(STORAGE_KEY);
+    showPreview();
+    document.getElementById("searchResult").innerHTML="";
+  }
+}
+
+
+function updateDashboard(){
+  const records = getRecords();
+  const total = records.length;
+  const average = total
+    ? (records.reduce((sum, student) => sum + Number(student.age), 0) / total).toFixed(1)
+    : "0";
+
+  document.getElementById("totalStudents").textContent = total;
+  document.getElementById("averageAge").textContent = average;
+}
+
+function showPreview(){
+  const records=getRecords();
+  const preview=document.getElementById("filePreview");
+
+  if(records.length===0){
+    preview.textContent="No records saved yet.";
+    return;
+  }
+
+  preview.textContent=records
+    .map(s=>`${s.roll}|${s.name}|${s.email}|${s.age}`)
+    .join("\\n");
+}
+
+function escapeHtml(value){
+  return value.replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",
+    '"':"&quot;","'":"&#039;"
+  }[c]));
+}
+
+updateDashboard();
+showPreview();
+
+document.addEventListener("keydown", function(event){
+  if(event.key !== "Enter") return;
+
+  const active = document.activeElement;
+
+  if(["roll","name","email","age"].includes(active.id)){
+    event.preventDefault();
+    addStudent();
+  }
+
+  if(active.id === "searchRoll"){
+    event.preventDefault();
+    findStudent();
+  }
+});
+
+</script>
+</body>
+</html>
